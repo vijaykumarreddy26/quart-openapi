@@ -1,7 +1,7 @@
 from quart import Quart, jsonify, Blueprint
 from quart.views import http_method_funcs
 import json
-from jsonschema import Draft4Validator, RefResolver, FormatChecker
+from jsonschema import Draft7Validator, RefResolver, FormatChecker
 from jsonschema.exceptions import ValidationError
 import logging
 from inspect import isclass
@@ -123,11 +123,11 @@ class BaseRest(object):
             self._schema = Swagger(self).as_dict()
         return self._schema
 
-    def get_validator(self, name: str) -> Optional[Draft4Validator]:
-        """Get a specific :class:`~jsonschema.Draft4Validator` instance by name
+    def get_validator(self, name: str) -> Optional[Draft7Validator]:
+        """Get a specific :class:`~jsonschema.Draft7Validator` instance by name
 
         :param name: The validator name to lookup
-        :return: the :class:`~jsonschema.Draft4Validator` object or None
+        :return: the :class:`~jsonschema.Draft7Validator` object or None
         """
         return self._validators[name] if name in self._validators else None
 
@@ -205,7 +205,7 @@ class BaseRest(object):
         :param code: The HTTP Response code for this response
         :param description: The description property for this response
         :param validator: pass a string to refer to a specific validator by name, a
-                          :class:`~jsonschema.Draft4Validator` instance such as from :meth:`get_validator`,
+                          :class:`~jsonschema.Draft7Validator` instance such as from :meth:`get_validator`,
                           :meth:`create_ref_validator` or :meth:`create_validator`, a jsonschema dict,
                           or the actual expected type of the response if a primitive
         :param \*\*kwargs: All other keyword args will be forwarded as properties of the response object
@@ -246,9 +246,9 @@ class BaseRest(object):
             return func_or_viewcls
         return decorator
 
-    def create_ref_validator(self, name: str, category: str) -> Draft4Validator:
+    def create_ref_validator(self, name: str, category: str) -> Draft7Validator:
         """Use the :attr:`base_model` to resolve the component category and name and create a
-        :class:`~jsonschema.Draft4Validator`
+        :class:`~jsonschema.Draft7Validator`
 
         :param name: The name of the model
         :param category: The category under 'components' to look in
@@ -263,11 +263,11 @@ class BaseRest(object):
 
         .. todo:: Ensure that models with the same name in different categories don't conflict
         """
-        validator = Draft4Validator({ '$ref': f'#/components/{category}/{name}' }, resolver=self._ref_resolver, format_checker=FormatChecker())
+        validator = Draft7Validator({ '$ref': f'#/components/{category}/{name}' }, resolver=self._ref_resolver, format_checker=FormatChecker())
         self._validators[name] = validator
         return validator
 
-    def create_validator(self, name: str, schema: Dict[str, Any]) -> Draft4Validator:
+    def create_validator(self, name: str, schema: Dict[str, Any]) -> Draft7Validator:
         """Create a validator from a schema
 
         :param name: The name of this validator
@@ -281,7 +281,7 @@ class BaseRest(object):
 
         .. seealso:: The :meth:`expect` decorator
         """
-        validator = Draft4Validator(schema, resolver=self._ref_resolver, format_checker=FormatChecker())
+        validator = Draft7Validator(schema, resolver=self._ref_resolver, format_checker=FormatChecker())
         self._validators[name] = validator
         return validator
 
